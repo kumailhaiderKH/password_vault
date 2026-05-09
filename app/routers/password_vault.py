@@ -5,7 +5,7 @@ from ..database import engine, SessionLocal, get_db
 
 router = APIRouter()
 
-@router.post("/vault", status_code=status.HTTP_201_CREATED)
+@router.post("/vault", status_code=status.HTTP_201_CREATED,response_model=schemas.password_out)
 def save_password(vault_entry: schemas.add_password, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     hashed_password = utils.hash(vault_entry.platform_password)
     vault_entry.platform_password = hashed_password
@@ -19,7 +19,7 @@ def save_password(vault_entry: schemas.add_password, db: Session = Depends(get_d
     return new_entry
 
 
-@router.get("/vault")
+@router.get("/vault",response_model=list[schemas.password_out])
 def get_passwords(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     passwords = db.query(models.user_vault).filter(models.user_vault.owner_id==current_user.id).all()
     return passwords
