@@ -17,5 +17,10 @@ def createuser(user: schemas.UserCreate, db:Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
+@router.get("/")
+def get_users(db:Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    return users
+
 
 
