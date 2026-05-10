@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
-from .. import models, schemas, utils
+from .. import models, schemas, utils, oauth2
 from sqlalchemy.orm import Session
 from ..database import engine, SessionLocal,get_db
 from sqlalchemy.exc import IntegrityError
@@ -49,11 +49,15 @@ def delete_user(id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{id}", response_model=schemas.UserOut)
-def update_user(id: int, updated_user: schemas.UserCreate, db: Session = Depends(get_db)):
+def update_user(id: int, updated_user: schemas.UserCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     user_query = db.query(models.User).filter(models.User.id == id)
     user = user_query.first()
     if user == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = f"User {id} does not exist")
+    if user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail = f"Not authorized to perform requested action")
+    hashed_password = utils.hash(updated_user.password)  # ✅ hash before saving
+    updated_user.password = hashed_password
     try:
         user_query.update(updated_user.dict(), synchronize_session=False)
         db.commit()
