@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Response
 from .. import schemas, database, models, oauth2, utils
 from sqlalchemy.orm import Session
 from ..database import engine, SessionLocal, get_db
@@ -28,3 +28,15 @@ def save_password(vault_entry: schemas.add_password, db: Session = Depends(get_d
 def get_passwords(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     passwords = db.query(models.user_vault).filter(models.user_vault.owner_id==current_user.id).all()
     return passwords
+
+@router.delete("/vault/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_password(id: int, db:Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+    entry_query = db.query(models.user_vault).filter(models.user_vault.id == id)
+    entry = entry_query.first()
+    if entry == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = f"Vault id {id} does not exist")
+    if entry.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail = f"Not authorized to perform requested action")
+    entry_query.delete(synchronize_session=False)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
