@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from .. import schemas, database, models, oauth2, utils
 from sqlalchemy.orm import Session
 from ..database import engine, SessionLocal, get_db
+from sqlalchemy.exc import IntegrityError
 
 router = APIRouter()
 
@@ -14,8 +15,12 @@ def save_password(vault_entry: schemas.add_password, db: Session = Depends(get_d
         **vault_entry.dict()
         )
     db.add(new_entry)
-    db.commit()
-    db.refresh(new_entry)
+    try:
+        db.commit()
+        db.refresh(new_entry)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail = f"You already have a password saved for {vault_entry.platform}")
     return new_entry
 
 
