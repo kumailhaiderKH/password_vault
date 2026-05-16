@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     secret_key: str
     algorithm: str
     access_token_expire_minutes: int
+    client_id: str
+    client_secret: str
+    redirect_uri: str
 
     class Config:
         env_file = ".env"

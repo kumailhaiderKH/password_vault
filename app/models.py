@@ -10,7 +10,8 @@ class User(Base):
 
     id = Column(Integer, primary_key = True, nullable = False)
     email = Column(String, unique = True, nullable = False)
-    password = Column(String, nullable = False)
+    password = Column(String, nullable = True)
+    auth_provider = Column(String, nullable = True)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default= text('now()'))
 
 class user_vault(Base):
