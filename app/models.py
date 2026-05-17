@@ -14,6 +14,18 @@ class User(Base):
     auth_provider = Column(String, nullable = True)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default= text('now()'))
 
+class Workspace(Base):
+    __tablename__ = "workspaces"
+
+    id = Column(Integer, primary_key = True, nullable = False)
+    name = Column(String, nullable = False)
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete = "CASCADE"), nullable = False)
+    owner = relationship("User")
+
+    __table_args__ = (
+        UniqueConstraint("name", "owner_id", name="one_owner_unique_workspace"),
+        )
+
 class user_vault(Base):
     __tablename__ = "vault"
 
@@ -24,9 +36,10 @@ class user_vault(Base):
     platform_password = Column(String, nullable = False)
     owner_id = Column(Integer, ForeignKey("users.id", ondelete = "CASCADE"), nullable= False)
     owner = relationship("User")
+    workspace_id = Column(Integer, ForeignKey("workspaces.id", ondelete = "CASCADE"), nullable = True)
+    workspace = relationship("Workspace")
 
-   
     __table_args__ = (
-        UniqueConstraint("platform", "owner_id", name="one_owner_one_platform"),
+        UniqueConstraint("platform", "owner_id","workspace_id", name="one_owner_one_platform_per_workspace"),
         )
     

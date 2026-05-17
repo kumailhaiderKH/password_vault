@@ -41,6 +41,7 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
         db.add(user)
         db.commit()
         db.refresh(user)
+        
 
     access_token = oauth2.create_access_token(data={"user_id": user.id})
     return {"access_token": access_token, "token_type": "bearer"}
