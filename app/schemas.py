@@ -17,11 +17,23 @@ class UserOut(BaseModel):
     class Config:
         from_attributes = True
 
+class workspace_create(BaseModel):
+    name: str
+    class Config:
+        from_attributes = True
+
+class workspace_out(BaseModel):
+    id:int
+    name: str
+    class Config:
+        from_attributes = True
+
 class add_password(BaseModel):
     platform: str
     website_URL: str
     platform_username: str
     platform_password: str
+    workspace_id: Optional[int] = None
     class Config:
         from_attributes = True
 
@@ -30,9 +42,12 @@ class password_out(BaseModel):
     platform: str
     website_URL: str
     platform_username: str
-    owner: UserOut
+    workspace: Optional[workspace_out] = None
     class Config:
         from_attributes = True
+
+
+
 class TokenData(BaseModel):
     id: Optional[int] = None
 

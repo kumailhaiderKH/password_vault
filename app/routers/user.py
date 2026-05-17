@@ -12,7 +12,7 @@ router = APIRouter(
 def createuser(user: schemas.UserCreate, db:Session = Depends(get_db)):
     hashed_password = utils.hash(user.password)
     user.password = hashed_password
-    new_user = models.User(**user.dict())
+    new_user = models.User(**user.model_dump())
     db.add(new_user)
     try:
         db.commit()
@@ -59,7 +59,7 @@ def update_user(id: int, updated_user: schemas.UserCreate, db: Session = Depends
     hashed_password = utils.hash(updated_user.password)  # ✅ hash before saving
     updated_user.password = hashed_password
     try:
-        user_query.update(updated_user.dict(), synchronize_session=False)
+        user_query.update(updated_user.model_dump(), synchronize_session=False)
         db.commit()
     except IntegrityError:
         db.rollback()
