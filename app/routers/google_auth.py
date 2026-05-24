@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
-from .. import google_oauth, models,oauth2
+from .. import google_oauth, models,oauth2, rate_limit as rl
 from sqlalchemy.orm import Session
 from fastapi.responses import RedirectResponse
 from ..database import get_db
@@ -8,7 +8,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 
-@router.get("/auth/google")
+@router.get("/auth/google", dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
 def google_login_page(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
