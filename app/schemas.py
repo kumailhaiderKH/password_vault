@@ -14,6 +14,7 @@ class UserOut(BaseModel):
     id : int
     email: EmailStr
     created_at: datetime
+    is_verified: bool
     class Config:
         from_attributes = True
 
