@@ -36,7 +36,8 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
         user = models.User(
             email = email,
             password = None,
-            auth_provider= "google"
+            auth_provider= "google",
+            is_verified= True
         )
         db.add(user)
         db.commit()
