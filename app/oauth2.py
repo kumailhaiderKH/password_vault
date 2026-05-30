@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, status, HTTPException
 from sqlalchemy.orm import Session
-from . import schemas, database, models
+from . import schemas, database, models, config
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl = 'login')
 
@@ -42,5 +42,30 @@ def get_current_user(token: str = Depends(oauth_scheme), db: Session = Depends(d
     if user is None:
         raise credentials_exception
     return user
+
+def create_verification_token(email:str):
+    expire = datetime.utcnow()+ timedelta(hours = 24)
+    data = {
+        "email": email,
+        "exp": expire,
+        "token_type": "email_verify"
+    }
+    return jwt.encode(data, SECRET_KEY, algorithm = ALGORITHM)
+
+def verify_verification_token(token: str):
+    try:
+        payload  = jwt.decode(token, SECRET_KEY, algorithms = [ALGORITHM])
+        email = payload.get("email")
+        token_type = payload.get("token_type")
+
+        if email is None or token_type != "email_verify":
+            return None
+        return email
+    except JWTError:
+        return None
+
+
+
+
 
 

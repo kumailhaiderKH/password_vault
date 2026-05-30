@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, Boolean
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import relationship
@@ -12,6 +12,7 @@ class User(Base):
     email = Column(String, unique = True, nullable = False)
     password = Column(String, nullable = True)
     auth_provider = Column(String, nullable = True)
+    is_verified = Column(Boolean, nullable = False, server_default = "False")
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default= text('now()'))
 
 class Workspace(Base):

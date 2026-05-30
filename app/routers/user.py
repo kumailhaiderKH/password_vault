@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
-from .. import models, schemas, utils, oauth2, rate_limit as rl
+from .. import models, schemas, utils, oauth2, rate_limit as rl, email
 from sqlalchemy.orm import Session
 from ..database import engine, SessionLocal,get_db
 from sqlalchemy.exc import IntegrityError
 
 router = APIRouter(
-    prefix= '/users'
+    prefix='/users'
 )
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut, dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
@@ -20,7 +20,23 @@ def createuser(user: schemas.UserCreate, db:Session = Depends(get_db)):
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail = f"The user {user.email} already exists")
+    token = oauth2.create_verification_token(new_user.email)
+    email.send_verification_email(new_user.email, token)
     return new_user
+
+@router.get("/verify/{token}")
+def verify_email(token: str, db:Session = Depends(get_db)):
+    email_address = oauth2.verify_verification_token(token)
+    if email_address is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = "Invalid or Expired token")
+    user = db.query(models.User).filter(models.User.email == email_address).first()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    if user.is_verified:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already verified")
+    user.is_verified = True
+    db.commit()
+    return {"message": "Email verified successfully ✅"}
 
 
 @router.get("/", response_model=list[schemas.UserOut], dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
@@ -65,5 +81,6 @@ def update_user(id: int, updated_user: schemas.UserCreate, db: Session = Depends
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail = f"The user {user.email} already exists")
     return user_query.first()
+
 
 

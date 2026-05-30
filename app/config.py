@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     client_id: str
     client_secret: str
     redirect_uri: str
+    sendgrid_api_key: str    
+    sender_email: str 
 
     class Config:
         env_file = ".env"
