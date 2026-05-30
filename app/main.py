@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 templates = Jinja2Templates(directory="app/templates")
 
-models.Base.metadata.create_all(bind = engine)
+#models.Base.metadata.create_all(bind = engine)
 
 app = FastAPI()
 
