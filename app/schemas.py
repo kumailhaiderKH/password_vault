@@ -43,6 +43,7 @@ class password_out(BaseModel):
     platform: str
     website_URL: str
     platform_username: str
+    platform_password: str
     workspace: Optional[workspace_out] = None
     class Config:
         from_attributes = True
