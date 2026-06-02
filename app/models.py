@@ -43,4 +43,19 @@ class user_vault(Base):
     __table_args__ = (
         UniqueConstraint("platform", "owner_id","workspace_id", name="one_owner_one_platform_per_workspace"),
         )
+class shared_password(Base):
+    __tablename__ = "shared_passwords"
+    id = Column(Integer, primary_key = True, nullable = False)
+    vault_id = Column(Integer, ForeignKey("vault.id", ondelete = "CASCADE"), nullable = False)
+    vault = relationship("user_vault")
+    owner_id  = Column(Integer, ForeignKey("users.id", ondelete = "CASCADE"), nullable = False)
+    owner = relationship("User", foreign_keys=[owner_id])
+    shared_with = Column(Integer, ForeignKey("users.id", ondelete = "CASCADE"), nullable = False)
+    shared = relationship("User", foreign_keys=[shared_with])
+    permission = Column(String, nullable = False, server_default="view")
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default= text('now()'))
+
+    __table_args__ = (
+        UniqueConstraint("shared_with","vault_id", name="unique_vault_shared_with"),
+        )
     

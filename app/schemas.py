@@ -48,7 +48,22 @@ class password_out(BaseModel):
     class Config:
         from_attributes = True
 
+class share_password(BaseModel):
+    shared_with: int
+    permission: Optional[str] = "view"
 
+    class Config:
+        from_attributes = True
+
+class share_password_out(BaseModel):
+    id: int
+    owner: UserOut
+    shared_with: int
+    permission: Optional[str]
+    vault: password_out
+    class Config:
+        from_attributes = True
+    
 
 class TokenData(BaseModel):
     id: Optional[int] = None
