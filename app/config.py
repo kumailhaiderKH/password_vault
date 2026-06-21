@@ -14,8 +14,11 @@ class Settings(BaseSettings):
     redirect_uri: str
     sendgrid_api_key: str    
     sender_email: str 
-    encryption_key: str
-
+    encryption_key_1: str
+    encryption_key_2: str
+    encryption_key_3: str
+    current_key_version: int
+    
     class Config:
         env_file = ".env"
 
