@@ -6,7 +6,7 @@ from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 
 router = APIRouter()
 
-@router.post("/login", dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
+@router.post("/login", dependencies=[Depends(rl.rate_limit())])
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.email  == user_credentials.username).first()
     if not user:

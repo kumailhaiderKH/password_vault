@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     encryption_key_2: str
     encryption_key_3: str
     current_key_version: int
+    rate_limit_requests: int = 5
+    rate_limit_window: int = 60
     
     class Config:
         env_file = ".env"
