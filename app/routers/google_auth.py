@@ -8,7 +8,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 
-@router.get("/auth/google", dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
+@router.get("/auth/google", dependencies=[Depends(rl.rate_limit())])
 def google_login_page(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 

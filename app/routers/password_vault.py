@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 router = APIRouter()
 
-@router.post("/vault", status_code=status.HTTP_201_CREATED,response_model=schemas.password_out, dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
+@router.post("/vault", status_code=status.HTTP_201_CREATED,response_model=schemas.password_out, dependencies=[Depends(rl.rate_limit())])
 def save_password(vault_entry: schemas.add_password, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     if vault_entry.workspace_id:
         workspace = db.query(models.Workspace).filter(models.Workspace.id == vault_entry.workspace_id, models.Workspace.owner_id == current_user.id).first()
@@ -64,14 +64,14 @@ def share_password(id: int, shared_entry: schemas.share_password, db: Session = 
     return new_shared_entry
 
 
-@router.get("/vault",response_model=list[schemas.password_out], dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
+@router.get("/vault",response_model=list[schemas.password_out], dependencies=[Depends(rl.rate_limit())])
 def get_passwords(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     passwords = db.query(models.user_vault).filter(models.user_vault.owner_id==current_user.id).all()
     for password in passwords:
         password.platform_password = utils.decrypt_password(password.platform_password, password.key_version)
     return passwords
 
-@router.put("/vault/{id}", response_model=schemas.password_out, dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
+@router.put("/vault/{id}", response_model=schemas.password_out, dependencies=[Depends(rl.rate_limit())])
 def update_password(id: int, updated_entry: schemas.add_password, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     entry_query = db.query(models.user_vault).filter(models.user_vault.id == id)
     entry = entry_query.first()
@@ -115,7 +115,7 @@ def delete_shared_password(id: int, user_id: int, db: Session = Depends(get_db),
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@router.delete("/vault/{id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
+@router.delete("/vault/{id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(rl.rate_limit())])
 def delete_password(id: int, db:Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     entry_query = db.query(models.user_vault).filter(models.user_vault.id == id)
     entry = entry_query.first()

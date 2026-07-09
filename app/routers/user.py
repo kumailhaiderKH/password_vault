@@ -8,7 +8,7 @@ router = APIRouter(
     prefix='/users'
 )
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut, dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut, dependencies=[Depends(rl.rate_limit())])
 def createuser(user: schemas.UserCreate, db:Session = Depends(get_db)):
     hashed_password = utils.hash(user.password)
     user.password = hashed_password
@@ -39,13 +39,13 @@ def verify_email(token: str, db:Session = Depends(get_db)):
     return {"message": "Email verified successfully ✅"}
 
 
-@router.get("/", response_model=list[schemas.UserOut], dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
+@router.get("/", response_model=list[schemas.UserOut], dependencies=[Depends(rl.rate_limit())])
 def get_users(db:Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users
 
 
-@router.get("/{id}", response_model=schemas.UserOut, dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
+@router.get("/{id}", response_model=schemas.UserOut, dependencies=[Depends(rl.rate_limit())])
 def get_user(id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
     if user == None:
@@ -53,7 +53,7 @@ def get_user(id: int, db: Session = Depends(get_db)):
     return user
 
 
-@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(rl.rate_limit())])
 def delete_user(id: int, db: Session = Depends(get_db)):
     user_query = db.query(models.User).filter(models.User.id == id)
     user = user_query.first()
@@ -64,7 +64,7 @@ def delete_user(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.put("/{id}", response_model=schemas.UserOut, dependencies=[Depends(rl.rate_limit(limit=5, window=60))])
+@router.put("/{id}", response_model=schemas.UserOut, dependencies=[Depends(rl.rate_limit())])
 def update_user(id: int, updated_user: schemas.UserCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     user_query = db.query(models.User).filter(models.User.id == id)
     user = user_query.first()
